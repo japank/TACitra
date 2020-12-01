@@ -22,7 +22,7 @@ function varargout = Pengelompokkan(varargin)
 
 % Edit the above text to modify the response to help Pengelompokkan
 
-% Last Modified by GUIDE v2.5 01-Dec-2020 14:17:20
+% Last Modified by GUIDE v2.5 01-Dec-2020 16:22:33
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -78,18 +78,31 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-folder = uigetdir();
-nama_folder = sprintf('%s', folder);
-%nama_folder = 'dataset';
-% membaca nama file yang berformat jpg
-nama_file = dir(fullfile(nama_folder,'*.jpg'));
+[names, path] = uigetfile('*.*','Select image file(s)', 'MultiSelect', 'on');
+
+% % return from this call, if no file is selected
+if isnumeric(names)
+    return    
+end
+
+% % convert char to cell, if only one file is selected
+ if ~iscellstr(names)
+     names = cellstr(names);
+ end
+handles.nama_file = names;
+handles.nama_folder = path;
+% handles.folder = uigetdir();
+% handles.nama_folder = sprintf('%s', handles.folder);
+% %nama_folder = 'dataset';
+% % membaca nama file yang berformat jpg
+handles.nama_file2 = dir(fullfile(handles.nama_folder,'*.jpg'));
 % menghitung jumlah file yang dibaca
-jumlah_file = numel(nama_file);
+handles.jumlah_file = numel(handles.nama_file);
 % menginisialisasi variabel ciri
 % melakukan ekstraksi ciri terhadap seluruh file yang dibaca
-for n = 1:jumlah_file
+for n = 1:handles.jumlah_file
     % membaca file citra
-    Img = imread(fullfile(nama_folder,nama_file(n).name));
+    Img = imread(fullfile(handles.nama_folder,handles.nama_file2(n).name));
    %rezise
     Img = imresize(Img,[500,500]);
     %merubah ruang warna
@@ -159,6 +172,21 @@ for n = 1:numel(Y)
 end
 set(handles.edit1, 'String', Y);
 
+handles.currentFileNo = 0;
+if handles.jumlah_file > 0     
+    handles.currentFileNo = handles.currentFileNo + 1;
+    currentFileName = char(handles.nama_file(handles.currentFileNo));    
+    image = imread([handles.nama_folder currentFileName]);     
+    %bring axes into focus anf show image
+    axes(handles.axes2);
+    imshow(image, []); %[] = [Imin Imax]
+    string2 = strcat(num2str(handles.currentFileNo),'.jpg :');
+    set(handles.edit2, 'String', string2);
+    
+end
+
+guidata(hObject,handles);
+
 
 function edit1_Callback(hObject, eventdata, handles)
 % hObject    handle to edit1 (see GCBO)
@@ -182,13 +210,63 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- If Enable == 'on', executes on mouse press in 5 pixel border.
-% --- Otherwise, executes on mouse press in 5 pixel border or over text3.
-function text3_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to text3 (see GCBO)
+% --- Executes on button press in pushbutton2.
+function pushbutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if handles.jumlah_file > 1 && handles.currentFileNo < handles.jumlah_file
+    handles.currentFileNo = handles.currentFileNo + 1;
+    currentFileName = char(handles.nama_file(handles.currentFileNo));    
+    image = imread([handles.nama_folder, currentFileName]);     
+    
+    %bring axes into focus anf show image
+    axes(handles.axes2);
+    imshow(image, []); %[] = [Imin Imax]
+    string2 = strcat(num2str(handles.currentFileNo),'.jpg :');
+    set(handles.edit2, 'String', string2);
+end
+guidata(hObject,handles);
+
+
+% --- Executes on button press in pushbutton3.
+function pushbutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if handles.jumlah_file > 1 && handles.currentFileNo > 1
+    handles.currentFileNo = handles.currentFileNo - 1;
+    currentFileName = char(handles.nama_file(handles.currentFileNo));    
+    image = imread([handles.nama_folder, currentFileName]);     
+    
+    %bring axes into focus anf show image
+    axes(handles.axes2);
+    imshow(image, []); %[] = [Imin Imax]
+    string2 = strcat(num2str(handles.currentFileNo),'.jpg :');
+    set(handles.edit2, 'String', string2);
+end
+
+guidata(hObject,handles);
+
+
+
+function edit2_Callback(hObject, eventdata, handles)
+% hObject    handle to edit2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Hints: get(hObject,'String') returns contents of edit2 as text
+%        str2double(get(hObject,'String')) returns contents of edit2 as a double
 
 
+% --- Executes during object creation, after setting all properties.
+function edit2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
