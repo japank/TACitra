@@ -103,13 +103,13 @@ handles.jumlah_file = numel(handles.nama_file);
 for n = 1:handles.jumlah_file
     % membaca file citra
     Img = imread(fullfile(handles.nama_folder,handles.nama_file2(n).name));
-   %rezise
+    %rezise
     Img = imresize(Img,[500,500]);
     %merubah ruang warna
     bw = im2bw(Img,0.5);
     %melakukan operasi crop
     bw = imcrop(bw, [50, 50, 300, 300]);
-    % melakukan median filtering
+    % melakukan median filtering/hilangkan derau
     bw = medfilt2(~bw,[5,5]);
     %Penajaman gambar pada gambar dengan Highpass Filter
     hpf1=[-1 -1 -1;-1 8 -1;-1 -1 -1]; 
@@ -122,12 +122,9 @@ for n = 1:handles.jumlah_file
     bw = imfill(bw,'holes');
     % melakukan operasi morfologi area opening
     bw = bwareaopen(bw,750);
-     %segmentasi garis
-   % bw= edge(bw,'roberts'); 
-   
     str = strel('disk',5);
     bw = imdilate(bw,str);
-   
+
     % melakukan ekstraksi ciri terhadap citra biner hasil thresholding
     stats1  = regionprops(bw, 'all');
     area = stats1.Area;
@@ -149,7 +146,7 @@ plot(X(idx==2,1),X(idx==2,2),'r.','MarkerSize',24)%cluster 1
 hold on
 plot(X(idx==1,1),X(idx==1,2),'g.','MarkerSize',24)%cluster 2
 legend('Cluster 1(motor)','Cluster 2(mobil)','Location','best')%window detail
-title('Cluster ')%judul
+title(' ')%judul
 xlabel('ukuran')%kordinat x
 ylabel('bentuk')%kordinat y
 h = gca;
